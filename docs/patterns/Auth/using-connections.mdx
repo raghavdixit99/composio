@@ -1,3 +1,4 @@
+```markdown
 ---
 title: "How to use Connections?"
 sidebarTitle: "Using Connections"
@@ -5,75 +6,75 @@ description: "Learn how to use connections"
 ---
 
 ### Get all connected accounts for an entity
-    <CodeGroup>
-    ```python Python
-    from composio import ComposioToolSet, App
-    toolset = ComposioToolSet()
+<CodeGroup>
+```python Python
+from composio import ComposioToolSet, App
+toolset = ComposioToolSet()
 
-    # Filter based on entity id
-    entity = toolset.get_entity(id="default")
-    try:
-        # Lists all connections of the entity
-        connected_accounts  = entity.get_connections() 
-        print(connected_accounts)
-    except NoItemsFound as e:
-        print("No connected account found")
-    ```
-    ```javascript JavaScript
-    import { OpenAIToolSet } from "composio-core";
-    const toolset = new OpenAIToolSet();
+# Filter based on entity id
+entity = toolset.get_entity(id="default")
+try:
+    # Lists all connections of the entity
+    connected_accounts  = entity.get_connections() 
+    print(connected_accounts)
+except NoItemsFound as e:
+    print("No connected account found")
+```
+```javascript JavaScript
+import { OpenAIToolSet } from "composio-core";
+const toolset = new OpenAIToolSet();
 
-    // Filter based on entity id
-    const entity = await toolset.client.getEntity("default")
+// Filter based on entity id
+const entity = await toolset.client.getEntity("default")
 
-    // lists all connections of the entity
-    const connected_accounts = await entity.getConnections()
+// lists all connections of the entity
+const connected_accounts = await entity.getConnections()
 
-    if (connected_accounts.length > 0) {
-        console.log(connected_accounts)
-    }else{
-        console.log("No connected account found")
-    }
-    ```
-    </CodeGroup>
+if (connected_accounts.length > 0) {
+    console.log(connected_accounts)
+}else{
+    console.log("No connected account found")
+}
+```
+</CodeGroup>
 
 ### Check if an entity has a connected account for a particular app
-    <CodeGroup>
-    ```python Python
-    from composio import ComposioToolSet, App
-    from composio.client.exceptions import NoItemsFound
+<CodeGroup>
+```python Python
+from composio import ComposioToolSet, App
+from composio.client.exceptions import NoItemsFound
 
-    toolset = ComposioToolSet()
+toolset = ComposioToolSet()
 
-    # Filter based on entity id
-    entity = toolset.get_entity(id="default") 
+# Filter based on entity id
+entity = toolset.get_entity(id="default") 
 
-    try:
-        # Filters based on app name
-        connection_details = entity.get_connection(app=App.GITHUB) 
-        # Filters based on connected account id for an entity
-        connection_details = entity.get_connection(connected_account_id="<connected_account_id>") 
-        print(connection_details)
-    except NoItemsFound as e:
-        print("No connected account found")
-    ```
-    ```javascript JavaScript
-    import { OpenAIToolSet } from "composio-core";
-    const toolset = new OpenAIToolSet();
+try:
+    # Filters based on app name
+    connection_details = entity.get_connection(app=App.GITHUB) 
+    # Filters based on connected account id for an entity
+    connection_details = entity.get_connection(connected_account_id="<connected_account_id>") 
+    print(connection_details)
+except NoItemsFound as e:
+    print("No connected account found")
+```
+```javascript JavaScript
+import { OpenAIToolSet } from "composio-core";
+const toolset = new OpenAIToolSet();
 
-    // Filter based on entity id
-    const entity = await toolset.client.getEntity("default")
+// Filter based on entity id
+const entity = await toolset.client.getEntity("default")
 
-    // Filters based on app name
-    const connectionDetails = await entity.getConnection({ appName: "GITHUB" })
+// Filters based on app name
+const connectionDetails = await entity.getConnection({ appName: "GITHUB" })
 
-    if(connectionDetails){
-        console.log(connectionDetails)
-    }else{
-        console.log("No connection details found")
-    }
-    ```
-    </CodeGroup>
+if(connectionDetails){
+    console.log(connectionDetails)
+}else{
+    console.log("No connection details found")
+}
+```
+</CodeGroup>
 
 ### Fetch the Connection Parameters
 You can use connection parameters locally to build custom actions. The following parameters are typically available:
@@ -148,8 +149,41 @@ Connected account raw auth params {
 
 </CodeGroup>
 
-
-
 <Note>
 You can fetch connection details after user is redirected back to your app (If redirect was needed) and `connectionStatus` & `connectedAccountId` will be available in the query params.
 </Note>
+
+### Authentication Handling with `createAuthProvider`
+The recent updates introduce a new way to handle authentication using the `createAuthProvider` function. This function allows you to configure different types of authentication, such as Basic and OAuth2, for your API connections.
+
+#### Setting Up Authentication
+To set up authentication, you need to configure the `ApiClient` with the appropriate authentication type and credentials. The `createAuthProvider` function will return an instance of the specified authentication provider.
+
+```javascript JavaScript
+import { ApiClient } from './api/client';
+
+const config = {
+  baseUrl: 'https://api.example.com',
+  auth: {
+    type: 'oauth2',
+    clientId: 'your-client-id',
+    clientSecret: 'your-client-secret',
+    redirectUri: 'your-redirect-uri',
+    authorizationEndpoint: 'https://auth.example.com/authorize',
+    tokenEndpoint: 'https://auth.example.com/token',
+    scope: 'read write'
+  }
+};
+
+const apiClient = new ApiClient(config);
+```
+
+#### OAuth2 Authentication Flow
+The `OAuth2Provider` supports various OAuth2 flows, including authorization code and client credentials. It handles token acquisition and refresh automatically.
+
+- **Authorization URL**: Use `getAuthorizationUrl` to generate the URL for user authorization.
+- **Access Token**: Use `getAccessToken` to exchange an authorization code for an access token.
+- **Token Refresh**: Use `refreshToken` to refresh an expired access token using a refresh token.
+
+This setup ensures that your API requests are authenticated and authorized according to the specified configuration.
+```

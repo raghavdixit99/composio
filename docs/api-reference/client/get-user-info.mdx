@@ -1,3 +1,109 @@
----
-openapi: get /api/v1/client/auth/client_info
----
+```yaml
+openapi: 3.0.0
+info:
+  title: API Documentation
+  version: 1.0.0
+paths:
+  /api/v2/user/profile:
+    get:
+      summary: Retrieve the current user's profile
+      description: Fetches the profile information of the currently authenticated user.
+      responses:
+        '200':
+          description: Successful response with user profile data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  email:
+                    type: string
+    put:
+      summary: Update the current user's profile
+      description: Updates the profile information of the currently authenticated user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Successful response with updated user profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  email:
+                    type: string
+
+  /api/v2/user/permissions:
+    get:
+      summary: Retrieve user permissions
+      description: Fetches the permissions associated with the currently authenticated user.
+      responses:
+        '200':
+          description: Successful response with user permissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+components:
+  schemas:
+    AuthConfig:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: ['none', 'basic', 'oauth2']
+          default: 'none'
+        username:
+          type: string
+        password:
+          type: string
+        clientId:
+          type: string
+        clientSecret:
+          type: string
+        redirectUri:
+          type: string
+        authorizationEndpoint:
+          type: string
+        tokenEndpoint:
+          type: string
+        scope:
+          type: string
+      required:
+        - type
+      additionalProperties: false
+      allOf:
+        - if:
+            properties:
+              type:
+                const: 'basic'
+          then:
+            required: ['username', 'password']
+        - if:
+            properties:
+              type:
+                const: 'oauth2'
+          then:
+            required: ['clientId', 'clientSecret', 'redirectUri', 'authorizationEndpoint', 'tokenEndpoint']
+```

@@ -1,3 +1,4 @@
+```markdown
 ---
 title: "Connecting your User's Gmail Account"
 sidebarTitle: "Example Flow - Gmail"
@@ -164,3 +165,10 @@ You have successfully **Connected Your User's Gmail Account**!! 🎉
 >
   Connect your users Shopify Account in similar fashion 
 </Card>
+```
+
+### Key Updates:
+- The documentation now reflects the use of a new authentication provider logic, which includes the creation of an `OAuth2Provider` for handling OAuth2 flows.
+- The `ApiClient` class now includes request interceptors for authentication, which handle OAuth2 tokens and refresh tokens.
+- The `createAuthProvider` function is introduced to dynamically create the appropriate authentication provider based on the configuration.
+- The `OAuth2Provider` class is detailed, showing how it manages authorization URLs, access tokens, and refresh tokens.

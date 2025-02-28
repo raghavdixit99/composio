@@ -1,11 +1,12 @@
+```markdown
 ---
-title: "Connecting a Shopify Account using API Key"
+title: "Connecting a Shopify Account using OAuth2"
 sidebarTitle: "Example Flow - Shopify"
-description: "Guide to getting your user's Shopify account connected using API Key"
+description: "Guide to getting your user's Shopify account connected using OAuth2"
 ---
 
-1. **Fetching authentication parameters** - Shopify requires an admin API access token and store subdomain for authentication.
-2. **Collecting those parameters from the user** - Collect the admin API access token and store subdomain from your user.
+1. **Fetching authentication parameters** - Shopify requires OAuth2 credentials including client ID, client secret, and redirect URI for authentication.
+2. **Collecting those parameters from the user** - Collect the client ID, client secret, and redirect URI from your user.
 3. **Initiating a connection** - Create a connection with the collected parameters.
 4. **Verifying the connection status** - Check that the connection was successful by verifying the status.
 
@@ -38,13 +39,17 @@ console.log(response["expectedInputFields"]);
 <CodeGroup>
 ```shell Output of Python Code
 [
-ExpectedFieldInput(name='admin_api_access_token', type='string',
-    description='Your Admin api acess token for authentication which can be generated from your Shopify app settings. Create a Shopify app and configure the required scopes. You can access your app settings and generate the token by visiting https://admin.shopify.com/store/<store-name>/settings/apps/development',
-    displayName='Admin Api Access Token', is_secret=False, required=True,
+ExpectedFieldInput(name='client_id', type='string',
+    description='Your OAuth2 client ID for authentication which can be generated from your Shopify app settings. Create a Shopify app and configure the required scopes. You can access your app settings and generate the client ID by visiting https://admin.shopify.com/store/<store-name>/settings/apps/development',
+    displayName='Client ID', is_secret=False, required=True,
     expected_from_customer=True, default=None, get_current_user_endpoint=None),
-ExpectedFieldInput(name='shop', type='string',
-    description="Your Shopify store's subdomain (e.g., your-store-name in your-store-name.myshopify.com)", 
-    displayName='Store Subdomain', is_secret=False, required=True,
+ExpectedFieldInput(name='client_secret', type='string',
+    description='Your OAuth2 client secret for authentication which can be generated from your Shopify app settings.',
+    displayName='Client Secret', is_secret=True, required=True,
+    expected_from_customer=True, default=None, get_current_user_endpoint=None),
+ExpectedFieldInput(name='redirect_uri', type='string',
+    description="The redirect URI configured in your Shopify app settings.",
+    displayName='Redirect URI', is_secret=False, required=True,
     expected_from_customer=True, default=None, get_current_user_endpoint=None)
 ]
 ```
@@ -52,33 +57,45 @@ ExpectedFieldInput(name='shop', type='string',
 ```shell Output of Javascript Code
 [
   {
-    name: 'admin_api_access_token',
+    name: 'client_id',
     type: 'string',
-    description: 'Your Admin api acess token for authentication which can be generated from your Shopify app settings. Create a Shopify app and configure the required scopes. You can access your app settings and generate the token by visiting https://admin.shopify.com/store/<store-name>/settings/apps/development',
-    display_name: 'Admin Api Access Token',
+    description: 'Your OAuth2 client ID for authentication which can be generated from your Shopify app settings. Create a Shopify app and configure the required scopes. You can access your app settings and generate the client ID by visiting https://admin.shopify.com/store/<store-name>/settings/apps/development',
+    display_name: 'Client ID',
     default: null,
     required: true,
     get_current_user_endpoint: null,
     expected_from_customer: true,
     is_secret: false,
-    displayName: 'Admin Api Access Token'
+    displayName: 'Client ID'
   },
   {
-    name: 'shop',
+    name: 'client_secret',
     type: 'string',
-    description: "Your Shopify store's subdomain (e.g., your-store-name in your-store-name.myshopify.com)",
-    display_name: 'Store Subdomain',
+    description: 'Your OAuth2 client secret for authentication which can be generated from your Shopify app settings.',
+    display_name: 'Client Secret',
+    default: null,
+    required: true,
+    get_current_user_endpoint: null,
+    expected_from_customer: true,
+    is_secret: true,
+    displayName: 'Client Secret'
+  },
+  {
+    name: 'redirect_uri',
+    type: 'string',
+    description: "The redirect URI configured in your Shopify app settings.",
+    display_name: 'Redirect URI',
     default: null,
     required: true,
     get_current_user_endpoint: null,
     expected_from_customer: true,
     is_secret: false,
-    displayName: 'Store Subdomain'
+    displayName: 'Redirect URI'
   }
 ]
 ```
 </CodeGroup>
-As stated in the output, you need to fetch the `admin_api_access_token` and `shop` from the user.
+As stated in the output, you need to fetch the `client_id`, `client_secret`, and `redirect_uri` from the user.
 
 You can fetch from user via `chat`, `ui`, `form`, `api`, etc. We will use `terminal` based approach as example.
 
@@ -117,12 +134,11 @@ console.log(collectedParams);
 </CodeGroup>
 
 </Step>
-    <Step title="Creating a Connection with Collected Parameters">
+<Step title="Creating a Connection with Collected Parameters">
 <CodeGroup>
 ```python Python Initiate connection 
 # This is the URL that the user will be redirected to after completing the authentication process
 redirect_url = "https://yourwebsite.com/connection/success"
-# this is only useful for oauth based flows involving redirect based authentication. 
 
 entity_id = "Jessica"  # This is the unique identifier for the user
 
@@ -142,7 +158,7 @@ if connection_request.connectionStatus == "INITIATED":
 elif connection_request.connectionStatus == "ACTIVE":
     print("Connection Status is active, you can now test by calling the tool.")
     # active connection means the user has completed the authentication process. 
-    # the API Key entered might still be invalid, you can test by calling the tool.
+    # the OAuth2 credentials entered might still be invalid, you can test by calling the tool.
 else:
     print("Connection process failed, please try again.")
 ```
@@ -170,20 +186,22 @@ if (connectionRequest.connectionStatus === "INITIATED") {
 } else if (connectionRequest.connectionStatus === "ACTIVE") {
     console.log("Connection Status is active, you can now test by calling the tool.");
     // active connection means the user has completed the authentication process. 
-    // the API Key entered might still be invalid, you can test by calling the tool.
+    // the OAuth2 credentials entered might still be invalid, you can test by calling the tool.
 } else {
     console.log("Connection process failed, please try again.");
 }
 ```
 </CodeGroup>
-        This is what the output looks like:
+This is what the output looks like:
 <CodeGroup>
 ```shell Output
-Enter the value for 'Admin Api Access Token', Description: Your Admin api acess token for authentication which can be generated from your Shopify app settings. Create a Shopify app and configure the required scopes. You can access your app settings and generate the token by visiting https://admin.shopify.com/store/<store-name>/settings/apps/development:
+Enter the value for 'Client ID', Description: Your OAuth2 client ID for authentication which can be generated from your Shopify app settings. Create a Shopify app and configure the required scopes. You can access your app settings and generate the client ID by visiting https://admin.shopify.com/store/<store-name>/settings/apps/development:
 123
-Enter the value for 'Store Subdomain', Description: Your Shopify store's subdomain (e.g., your-store-name in your-store-name.myshopify.com):
-myshop
-{'admin_api_access_token': '123', 'shop': 'myshop'}
+Enter the value for 'Client Secret', Description: Your OAuth2 client secret for authentication which can be generated from your Shopify app settings.:
+abc
+Enter the value for 'Redirect URI', Description: The redirect URI configured in your Shopify app settings.:
+https://yourwebsite.com/connection/success
+{'client_id': '123', 'client_secret': 'abc', 'redirect_uri': 'https://yourwebsite.com/connection/success'}
 Connection Status is active, you can now test by calling the tool.
 ```
 </CodeGroup>
@@ -224,3 +242,4 @@ You have successfully **Connected Your User's Shopify Account**!! 🎉
 >
   Connect your users Gmail Account in similar fashion 
 </Card>
+```
